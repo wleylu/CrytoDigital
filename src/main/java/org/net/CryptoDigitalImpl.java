@@ -6,7 +6,11 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.security.*;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -100,7 +104,24 @@ public class CryptoDigitalImpl {
         PrivateKey privateKey=keyFactory.generatePrivate(new PKCS8EncodedKeySpec(passBase64));
 
         return privateKey;
+    }
 
+    public PublicKey publicKeyFromCertificate (String fileName) throws Exception {
+        FileInputStream fileInputStream = new FileInputStream(fileName);
+        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+        Certificate certificate = certificateFactory.generateCertificate(fileInputStream);
+        System.out.println(certificate);
+        return  certificate.getPublicKey();
+    }
+
+    public PrivateKey privateKeyJKS(String fileName,String jksPassword,String allias) throws Exception {
+        FileInputStream fileInputStream = new FileInputStream(fileName);
+        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        keyStore.load(fileInputStream, jksPassword.toCharArray());
+        Key key = keyStore.getKey(allias,jksPassword.toCharArray());
+        PrivateKey privateKey = (PrivateKey) key;
+
+        return privateKey;
     }
 
 
